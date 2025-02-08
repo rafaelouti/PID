@@ -1,100 +1,67 @@
-import tkinter as tk
-import threading
-import time
-import random
-import math
+# Simulador de Controle PID em Python com Tkinter
 
-class MotorSupervisory:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Supervisório Industrial - Motores")
-        self.root.geometry("600x400")
-        root.configure(bg="green") 
+Este projeto é uma simulação interativa de controle PID para **nível de tanque e temperatura** utilizando Python e Tkinter. Ideal para entender e visualizar o funcionamento de controladores PID em sistemas de automação.
 
-        # Canvas para desenhar motores
-        self.canvas = tk.Canvas(root, width=600, height=250, bg="white")
-        self.canvas.pack()
+## 📋 Funcionalidades
+- **Controle PID Completo**: Ajuste dinâmico dos parâmetros Kp, Ki e Kd.
+- **Simulação de Nível e Temperatura**:
+  - Controle de nível de tanque com válvula (0% a 100%).
+  - Simulação de temperatura com sensor virtual PT100, incluindo ruído.
+  - Atraso térmico para resposta realista.
+- **Interface Gráfica com Tkinter**:
+  - Interface amigável com fundo amarelo e tanque visual.
+  - Monitoramento em tempo real dos valores de processo (PV), abertura da válvula (MV) e temperatura.
 
-        # Motores e LEDs
-        self.motors = [
-            {"x": 100, "y": 100, "status": False, "led": None, "fan": None, "angle": 0, "temp": 25},
-            {"x": 250, "y": 100, "status": False, "led": None, "fan": None, "angle": 0, "temp": 25},
-            {"x": 400, "y": 100, "status": False, "led": None, "fan": None, "angle": 0, "temp": 25},
-        ]
+## 🚀 Como Executar
+1. Clone o repositório:
+    ```bash
+    git clone https://github.com/seu-usuario/simulador-pid-python.git
+    cd simulador-pid-python
+    ```
+2. Instale as dependências necessárias (se houver):
+    ```bash
+    pip install -r requirements.txt
+    ```
+3. Execute o script:
+    ```bash
+    python simulador_pid.py
+    ```
 
-        # Criando motores, hélices e LEDs
-        for motor in self.motors:
-            self.canvas.create_oval(
-                motor["x"], motor["y"], motor["x"] + 50, motor["y"] + 50, fill="gray"
-            )
-            motor["fan"] = self.canvas.create_line(  # Hélice
-                motor["x"] + 25, motor["y"] + 25, motor["x"] + 25, motor["y"], width=4, fill="black"
-            )
-            motor["led"] = self.canvas.create_oval(  # LED
-                motor["x"] + 15, motor["y"] + 60, motor["x"] + 35, motor["y"] + 80, fill="red"
-            )
+## 🎨 Interface do Usuário
+- **Set Point (SP)**: Defina o nível desejado do tanque.
+- **Nível Atual (PV)**: Visualize o nível real do tanque.
+- **Abertura da Válvula (MV)**: Controle automático via PID.
+- **Temperatura (PT100)**: Veja a temperatura em tempo real com ruído.
 
-        # Criando botões de controle
-        self.buttons = []
-        for i in range(3):
-            btn = tk.Button(root, text=f"Ligar Motor {i+1}", command=lambda i=i: self.toggle_motor(i))
-            btn.pack(side=tk.LEFT, padx=10)
-            self.buttons.append(btn)
+## 🔧 Ajuste dos Parâmetros PID
+- **Kp (Proporcional)**: Ajusta a resposta ao erro atual.
+- **Ki (Integral)**: Compensa erros acumulados ao longo do tempo.
+- **Kd (Derivativo)**: Suaviza a resposta para evitar oscilações.
 
-        # Labels de temperatura
-        self.temp_labels = []
-        for i in range(3):
-            lbl = tk.Label(root, text=f"Temp. Motor {i+1}: 25°C")
-            lbl.pack(side=tk.LEFT, padx=10)
-            self.temp_labels.append(lbl)
+## 📊 Exemplos de Aplicação
+- Automação industrial (controle de nível, temperatura, vazão).
+- Sistemas de aquecimento e refrigeração.
+- Controle de motores e processos dinâmicos.
 
-        # Atualizar temperaturas
-        self.update_temperatures()
+## 🛠️ Melhorias Futuras
+- Adicionar gráficos para histórico de PV e MV.
+- Implementar controle PID para múltiplas variáveis.
+- Simular diferentes tipos de processos (temperatura, pressão).
 
-    def toggle_motor(self, index):
-        """Liga ou desliga o motor e anima a rotação da hélice"""
-        motor = self.motors[index]
-        motor["status"] = not motor["status"]
-        
-        # Atualiza LED e cor do botão
-        color = "green" if motor["status"] else "red"
-        self.canvas.itemconfig(motor["led"], fill=color)
-        self.buttons[index].config(text=f"{'Desligar' if motor['status'] else 'Ligar'} Motor {index+1}")
+## 🤝 Contribuindo
+Contribuições são bem-vindas!  
+1. Faça um fork do projeto.  
+2. Crie uma branch com sua feature (`git checkout -b feature/nova-feature`).  
+3. Faça o commit (`git commit -m 'Adiciona nova feature'`).  
+4. Dê um push na branch (`git push origin feature/nova-feature`).  
+5. Abra um Pull Request.  
 
-        # Inicia animação se estiver ligado
-        if motor["status"]:
-            threading.Thread(target=self.animate_motor, args=(index,), daemon=True).start()
+## 📝 Licença
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-    def animate_motor(self, index):
-        """Anima a hélice do motor girando"""
-        motor = self.motors[index]
-        while motor["status"]:
-            motor["angle"] += 20  # Incrementa o ângulo
-            if motor["angle"] >= 360:
-                motor["angle"] = 0
+## 📞 Contato
+Criado por [Rafael Outi](https://linkedin.com/in/rafaelouti).  
+Sinta-se à vontade para entrar em contato para dúvidas ou sugestões!
 
-            # Calcula nova posição da hélice
-            x1 = motor["x"] + 25 + 20 * math.cos(math.radians(motor["angle"]))
-            y1 = motor["y"] + 25 + 20 * math.sin(math.radians(motor["angle"]))
-
-            # Atualiza hélice no canvas
-            self.canvas.coords(motor["fan"], motor["x"] + 25, motor["y"] + 25, x1, y1)
-            self.root.update()
-            time.sleep(0.1)
-
-    def update_temperatures(self):
-        """Simula variação de temperatura"""
-        for i, motor in enumerate(self.motors):
-            if motor["status"]:
-                motor["temp"] += random.uniform(-0.5, 1.5)
-            else:
-                motor["temp"] = max(25, motor["temp"] - 0.5)
-
-            self.temp_labels[i].config(text=f"Temp. Motor {i+1}: {motor['temp']:.1f}°C")
-
-        self.root.after(1000, self.update_temperatures)
-
-# Iniciar interface
-root = tk.Tk()
-app = MotorSupervisory(root)
-root.mainloop()
+## ⭐ Agradecimentos
+Se você achou este projeto útil, dê uma estrela ⭐ no GitHub! Isso ajuda a divulgar e motivar mais melhorias.
